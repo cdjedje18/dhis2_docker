@@ -10,6 +10,17 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  # The dhis2/core image runs as UID 65534 (nobody). On Linux a bind mount keeps
+  # the host's ownership, so that user cannot write to DHIS2_HOME and DHIS2 aborts
+  # with "External directory not set". Fix the ownership before web starts.
+  # (No-op on Docker Desktop, where bind mounts are already world-writable.)
+  init:
+    image: busybox:stable
+    user: "0:0"
+    command: sh -c 'chown -R 65534:65534 /opt/dhis2 || true'
+    volumes:
+      - ./config/dhis2_home:/opt/dhis2
+
   web:
     image: dhis2/core:2.41.8.1
     environment:
@@ -19,7 +30,10 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_started
+      init:
+        condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:
