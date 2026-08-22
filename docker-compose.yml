@@ -2,7 +2,7 @@ version: '3'
 
 services:
   db:
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:12-3.3
     command: postgres -c max_locks_per_transaction=100
     environment:
       POSTGRES_USER: dhis
@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: dhis
 
   web:
-    image: dhis2/core:2.41.8.1
+    image: dhis2/core:2.36.12.1
     volumes:
       - ./config/dhis2_home:/opt/dhis2
     ports:
